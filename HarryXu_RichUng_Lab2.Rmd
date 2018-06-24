@@ -10,20 +10,44 @@ geometry: margin=1in
 line_spacing: single
 ---
 
+# Introduction
 
-\newpage
-# Strategic Placement of Products in Grocery Stores
+## Strategic Placement of Products in Grocery Stores
 
-Answer **Question 12 of chapter 3 (on page 189 and 190)** of Bilder and Loughin's *"Analysis of Categorical Data with R"*.  Here is the background of this analysis, taken as an excerpt from this question:
+We receive the following prompt from **Question 12 of chapter 3 (on page 189 and 190)** within Bilder and Loughin's *"Analysis of Categorical Data with R"*:
 
-```In order to maximize sales, items within grocery stores are strategically placed to draw customer attention. This exercise examines one type of item—breakfast cereal. Typically, in large grocery stores, boxes of cereal are placed on sets of shelves located on one side of the aisle. By placing particular boxes of cereals on specific shelves, grocery stores may better attract customers to them. To investigate this further, a random sample of size 10 was taken from each of four shelves at a Dillons grocery store in Manhattan, KS. These data are given in the cereal_dillons.csv file. The response variable is the shelf number, which is numbered from bottom (1) to top (4), and the explanatory variables are the sugar, fat, and sodium content of the cereals. Using these data, complete the following:```
+```In order to maximize sales, items within grocery stores are strategically placed to draw customer attention. This exercise examines one type of item—breakfast cereal. Typically, in large grocery stores, boxes of cereal are placed on sets of shelves located on one side of the aisle. By placing particular boxes of cereals on specific shelves, grocery stores may better attract customers to them. To investigate this further, a random sample of size 10 was taken from each of four shelves at a Dillons grocery store in Manhattan, KS. These data are given in the cereal_dillons.csv file. The response variable is the shelf number, which is numbered from bottom (1) to top (4), and the explanatory variables are the sugar, fat, and sodium content of the cereals.```
+
+By using multicategory response models, we can maximize sales by placing the cereal in the shelf that best fits its attributes (such as sugar, fat, and sodium content).
+
+# Exploratory Data Analysis
+
+In order to perform our analyses, we first load the required R libraries:
+
+```{r setup, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy.opts=list(width.cutoff=60), tidy=TRUE)
+library(package = MASS)
+library(package = car)
+```
+
+Next, we load the data and perform a quick EDA:
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 cereal <- read.csv('cereal_dillons.csv', header=TRUE)
 head(cereal)
+str(cereal)
+summary(cereal)
 ```
 
-# a
+We can see that our dataset has 40 observations of 7 variables, with no missing values for any of our variables. It looks like each row corresponds to a particular cereal, where "Cereal" contains the name of the cereal and "Shelf" contains the shelf that the cereal is located. We can also see that we have the serving size, sugar, fat, and sodium contents for each cereal.
+
+# Modeling & Questions
+
+We go through our modeling as we go through parts a through h within this question:
+
+## Part A
+
+#### Question
 
 The explanatory variables need to be re-formatted before proceeding further. First, divide each explanatory variable by its serving size to account for the different serving sizes among the cereals. Second, re-scale each variable to be within 0 and $1.^{12}$ Below is code we use to re-format the data after the data file is read into an object named `cereal`:
 
@@ -35,11 +59,28 @@ cereal2 <- data.frame(Shelf = cereal$Shelf, sugar =
                         stand01(x = cereal$sodium_mg/cereal$size_g))
 ```
 
-# b
+#### Answer
+
+By executing the code chunk above, we have already re-formatted the dataset by dividing each explanatory variable by its serving size to account for the different serving sizes among the cereals, and re-scaling each variable to be between 0 and 1 in order to help with the convergence of parameter estimates.
+
+## Part B
+
+#### Question
 
 Construct side-by-side box plots with dot plots overlaid for each of the explanatory variables. Below is code that can be used for plots involving sugar:
 
-```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+```{r, eval = FALSE}
+boxplot(formula = sugar ~ Shelf, data = cereal2, ylab = "Sugar", xlab = "Shelf", pars = list(outpch=NA))
+stripchart(x = cereal2$sugar ~ cereal2$Shelf, lwd = 2, col = "red", method = "jitter", vertical = TRUE, pch = 1, add = TRUE)
+```
+
+Also, construct a parallel coordinates plot for the explanatory variables and the shelf number. Discuss if possible content differences exist among the shelves.
+
+#### Answer
+
+Below are the side-by-side box plots with dot plots overlaid for each of the explanatory variables:
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), fig.height = 4.5, fig.width = 5.5, fig.align = "center"}
 boxplot(formula = sugar ~ Shelf, data = cereal2, ylab = "Sugar", xlab = "Shelf", pars = list(outpch=NA))
 stripchart(x = cereal2$sugar ~ cereal2$Shelf, lwd = 2, col = "red", method = "jitter", vertical = TRUE, pch = 1, add = TRUE)
 
@@ -50,11 +91,9 @@ boxplot(formula = sodium ~ Shelf, data = cereal2, ylab = "Sodium", xlab = "Shelf
 stripchart(x = cereal2$sodium ~ cereal2$Shelf, lwd = 2, col = "red", method = "jitter", vertical = TRUE, pch = 1, add = TRUE)
 ```
 
-Also, construct a parallel coordinates plot for the explanatory variables and the shelf number. Discuss if possible content differences exist among the shelves.
+Below is a parallel coordinates plot for the explanatory variables and the shelf number:
 
-
-```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-library(package = MASS)
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), fig.height = 4.5, fig.width = 5.5, fig.align = "center"}
 
 cereal2.colors<-ifelse(test = cereal2$Shelf==1, yes = "black", 
                     no = ifelse(test = cereal2$Shelf==2, yes = "red",
@@ -75,30 +114,40 @@ There appears to be some content difference clustered by shelves. As the above p
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 cereal[cereal$Shelf==4,]
 ```
-# c
+
+## Part C
+
+#### Question
 
 The response has values of 1, 2, 3, and 4. Under what setting would it be desirable to take into account ordinality. Do you think this occurs here?
 
+#### Answer
+
 It would be desirable to take into account ordinality when the variable has a natural ordering to their levels. In other words, if response levels can be arranged so that category 1 < category 2 < ··· < category J in some conceptual scale of measurement (e.g., amount of agreement). Since the shelf has a natural ordering to their levels, bottom (1) to top (4), it would make sense to take into account ordinality.
 
-# d
+## Part D
+
+#### Question
 
 Estimate a multinomial regression model with linear forms of the sugar, fat, and sodium variables. Perform LRTs to examine the importance of each explanatory variable.
 
+#### Answer
+
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-library(package = MASS)
 mod.fit.ord <- polr(formula = as.factor(Shelf) ~ sugar + fat + sodium, data = cereal2, method = "logistic")
 summary(mod.fit.ord)
-library(package = car)
 Anova(mod.fit.ord)
 ```
 
-# e
+## Part E
+
+#### Question
 
 Show that there are no significant interactions among the explanatory variables (including an interaction among all three variables).
 
+#### Answer
+
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-library(package = car)
 mod.fit.ord2 <- polr(formula = as.factor(Shelf) ~ sugar + fat + sodium
                      + sugar:fat + sugar:sodium + fat:sodium
                      + sugar:fat:sodium
@@ -106,9 +155,13 @@ mod.fit.ord2 <- polr(formula = as.factor(Shelf) ~ sugar + fat + sodium
 Anova(mod.fit.ord2)
 ```
 
-# f
+## Part F
+
+#### Question
 
 Kellogg’s Apple Jacks (http://www.applejacks.com) is a cereal marketed to- ward children. For a serving size of 28 grams, its sugar content is 12 grams, fat content is 0.5 grams, and sodium content is 130 milligrams. Estimate the shelf probabilities for Apple Jacks.
+
+#### Answer
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 summary(mod.fit.ord)
@@ -117,12 +170,15 @@ predict(object = mod.fit.ord, newdata = data.frame(sugar = (((12/28) - min(cerea
                                                    sodium = (((130/28) - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))),  type = "probs")
 ```
 
-# g
+## Part G
+
+#### Question
 
 Construct a plot similar to Figure 3.3 where the estimated probability for a shelf is on the y-axis and the sugar content is on the x-axis. Use the mean overall fat and sodium content as the corresponding variable values in the model. Interpret the plot with respect to sugar content.
 
+#### Answer
 
-```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), fig.height = 4.5, fig.width = 5.5, fig.align = "center"}
 library(package = MASS)
 library(package = nnet)
 mod.fit.sugar<-polr(formula = as.factor(Shelf) ~ sugar + sodium + fat, data = cereal2, method = "logistic")
@@ -171,12 +227,50 @@ legend(x = 'bottomleft', legend=c("Shelf 1", "Shelf 2", "Shelf 3", "Shelf 4"),
        col=c("green","red","blue", "black"), bty="n", lwd = c(2,2,2,2), seg.len = 4)
 ```
 
-# h
+## Part H
+
+#### Question
 
 Estimate odds ratios and calculate corresponding confidence intervals for each explanatory variable. Relate your interpretations back to the plots constructed for this exercise.
 
+#### Answer
+
+We convert c to be 1g or 1mg of the content in order to better explain the interpretation:
+
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 
+sd.cereal<-round(apply(X = cereal[,-c(1,2,3,4)], MARGIN = 2, FUN = sd))
+
+sd.cereal
+
+sugar_1g_conv <- (((sd.cereal[1]/28) - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g)))
+
+fat_1g_conv <- (((sd.cereal[2]/28) - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g)))
+
+sodium_1mg_conv <- (((sd.cereal[3]/28) - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))
+
+c.value <- c(sugar_1g_conv, fat_1g_conv, sodium_1mg_conv)
+
+round(exp(c.value * (-mod.fit.ord$coefficients)),2)
+
+conf.beta <- confint(object = mod.fit.ord, level = 0.95)
+
+ci <- exp(c.value*(-conf.beta))
+
+round(data.frame(low = ci[,2], up = ci[,1]), 2)
+
+summary(mod.fit.ord)
+
+Anova(mod.fit.ord)
+
 ```
+
+# Conclusion
+
+In conclusion, we were able to predict...
+
+
+
+
 
 
