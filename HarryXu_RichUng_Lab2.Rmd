@@ -179,6 +179,21 @@ Construct a plot similar to Figure 3.3 where the estimated probability for a she
 #### Answer
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), fig.height = 4.5, fig.width = 5.5, fig.align = "center"}
+mod.fit.ord$coefficients
+mod.fit.ord$zeta
+
+
+summary(mod.fit.ord)
+
+#curve(expr = plogis(q = mod.fit.ord$zeta[1] - mod.fit.ord$coefficients))
+
+#curve(expr = plogis(q = mod.fit.dens$zeta[1] - mod.fit.dens$coefficients*x), col = "green",
+#     type = "l", xlim = c(min(wheat$density[wheat$type.order == "Scab"]), max(wheat$density[wheat$type.order == "Scab"])),
+#     add = TRUE, lty = "dotdash", lwd = lwd.po, n = 1000)  # Scab
+
+#curve(expr = 1/(1 + exp(beta.hat[1,1] + beta.hat[1,2]*x) + exp(beta.hat[2,1] + beta.hat[2,2]*x)), ylab = expression(hat(pi)), xlab = #"Density",
+#      xlim = c(min(wheat$density), max(wheat$density)), col = "black", lty = "solid", lwd = 2, n = 1000, type = "n",
+#      panel.first = grid(col = "gray", lty = "dotted"))
 
 ```
 
@@ -190,7 +205,33 @@ Estimate odds ratios and calculate corresponding confidence intervals for each e
 
 #### Answer
 
+We convert c to be 1g or 1mg of the content in order to better explain the interpretation:
+
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+sd.cereal<-round(apply(X = cereal[,-c(1,2,3,4)], MARGIN = 2, FUN = sd))
+
+sd.cereal
+
+sugar_1g_conv <- (((sd.cereal[1]/28) - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g)))
+
+fat_1g_conv <- (((sd.cereal[2]/28) - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g)))
+
+sodium_1mg_conv <- (((sd.cereal[3]/28) - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))
+
+c.value <- c(sugar_1g_conv, fat_1g_conv, sodium_1mg_conv)
+
+round(exp(c.value * (-mod.fit.ord$coefficients)),2)
+
+conf.beta <- confint(object = mod.fit.ord, level = 0.95)
+
+ci <- exp(c.value*(-conf.beta))
+
+round(data.frame(low = ci[,2], up = ci[,1]), 2)
+
+summary(mod.fit.ord)
+
+Anova(mod.fit.ord)
 
 ```
 
