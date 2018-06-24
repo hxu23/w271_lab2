@@ -123,7 +123,52 @@ Construct a plot similar to Figure 3.3 where the estimated probability for a she
 
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+library(package = MASS)
+library(package = nnet)
+mod.fit.sugar<-polr(formula = as.factor(Shelf) ~ sugar + sodium + fat, data = cereal2, method = "logistic")
+summary(mod.fit.sugar)
+beta.hat<-c(-mod.fit.ord$coefficients, mod.fit.ord$zeta)
 
+curve( 1/(1 + exp(beta.hat[3] + beta.hat[1]*x) + exp(beta.hat[4] + beta.hat[1]*x)),
+      ylab = expression(hat(pi)), xlab = "Sugar",
+      ylim = c(0,0.5),
+      xlim = c(min(cereal2$sugar), max(cereal2$sugar)), 
+      col = "black", lty = "solid", lwd = 2, n = 1000, type = "n",
+      panel.first = grid(col = "gray", lty = "dotted"))
+
+curve(expr = plogis(q = mod.fit.sugar$zeta[1] - mod.fit.sugar$coefficients[1]*x 
+                    - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
+                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), col = "green",
+      type = "l",
+      add = TRUE, lty = "dotdash", n = 1000)  # Shelf 1
+
+
+curve(expr = plogis(q = mod.fit.sugar$zeta[2] - mod.fit.sugar$coefficients[1]*x
+                        - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
+                        - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)) 
+          - plogis(q = mod.fit.sugar$zeta[1] - mod.fit.sugar$coefficients[1]*x 
+                    - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
+                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), col = "red",
+     type = "l",
+     add = TRUE, lty = "longdash", n = 1000)  # Shelf 2
+
+curve(expr = plogis(q = mod.fit.sugar$zeta[3] - mod.fit.sugar$coefficients[1]*x
+                        - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
+                        - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)) 
+          - plogis(q = mod.fit.sugar$zeta[2] - mod.fit.sugar$coefficients[1]*x 
+                    - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
+                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), 
+      col = "blue", type = "l", add = TRUE, lty = "solid", n = 1000)  # Shelf 3
+
+
+curve(expr = 1 - plogis(q=mod.fit.sugar$zeta[3]- mod.fit.sugar$coefficients[1]*x
+                        - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
+                        - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)),
+     col='black', type="l", add = TRUE, lty = "twodash", n = 1000)
+
+legend(x = 'bottomleft', legend=c("Shelf 1", "Shelf 2", "Shelf 3", "Shelf 4"), 
+       lty=c("dotdash","longdash","solid", "twodash"),
+       col=c("green","red","blue", "black"), bty="n", lwd = c(2,2,2,2), seg.len = 4)
 ```
 
 # h
