@@ -60,7 +60,7 @@ From the above histogram plots, we can see that most of the cereal have serving 
 
 # Modeling & Questions
 
-We go through our modeling as we go through parts a through h within this question:
+We go through our modeling as we go through parts A through H within **Question 12 of chapter 3 (on page 189 and 190)** within Bilder and Loughin's *"Analysis of Categorical Data with R"*:
 
 ## Part A
 
@@ -188,12 +188,19 @@ Kellogg’s Apple Jacks (http://www.applejacks.com) is a cereal marketed toward 
 #### Answer
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-predict(object = mod.fit.ord, newdata = data.frame(sugar = (((12/28) - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g))),
-                                                   fat = (((0.5/28) - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g))),
-                                                   sodium = (((130/28) - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))),  type = "probs")
+predict(object = mod.fit.ord, newdata = data.frame(sugar = 
+                                                     (((12/28) - min(cereal$sugar_g/cereal$size_g))
+                                                      /(max(cereal$sugar_g/cereal$size_g) - min(cereal$sugar_g/cereal$size_g))),
+                                                   fat =
+                                                     (((0.5/28) - min(cereal$fat_g/cereal$size_g))
+                                                      /(max(cereal$fat_g/cereal$size_g) - min(cereal$fat_g/cereal$size_g))),
+                                                   sodium =
+                                                     (((130/28) - min(cereal$sodium_mg/cereal$size_g))
+                                                      /(max(cereal$sodium_mg/cereal$size_g) - min(cereal$sodium_mg/cereal$size_g)))),
+        type = "probs")
 ```
 
-By predicting the shelf probabilities based on the serving size, sugar content, fat content, and sodium content of Apple Jacks cereal, we can see that there is about a 0.9% chance of it being on shelf 1, a 2.8% chance of it being on shelf 2, a 9.5% chance of it being on shelf 3, and a 86.8% chance of it being on shelf 4. We can conclude that Apple Jacks has a higher probability of appearing on the higher shelves, with the highest probability of it being on the top (4) shelf.
+By predicting the shelf probabilities based on the serving size, sugar content, fat content, and sodium content of Apple Jacks cereal, we can see that there is about a 19.9% chance of it being on shelf 1, a 30.5% chance of it being on shelf 2, a 29.5% chance of it being on shelf 3, and a 20.2% chance of it being on shelf 4. We can conclude that Apple Jacks should probably be placed on shelf 2.
 
 ## Part G
 
@@ -265,15 +272,26 @@ First, we take a look at the standard deviations of the explanatory variables in
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # Obtain standard deviation of the explanatory variables and normalize the values
 # to obtain c-values used for the odd ratios and confidence intervals
-(sd.cereal<-round(apply(X = cereal[,-c(1,2,3,4)], MARGIN = 2, FUN = sd)))
+cereal$sugar_serv <- cereal$sugar_g/cereal$size_g
+cereal$fat_serv <- cereal$fat_g/cereal$size_g
+cereal$sodium_serv <- cereal$sodium_mg/cereal$size_g
+sd(cereal$sugar_serv)
+sd(cereal$fat_serv)
+sd(cereal$sodium_serv)
 ```
 
-Looking at the above standard deviations, we decided to calculate odds ratios and corresponding confidence intervals according to a 5g increase in sugar per serving, a 1g increase in fat per serving, and 100mg increease in sodium per serving. This would provide a clearer interpretation with an increase that's close to an explanatory variable's standard deviation.
+Looking at the above standard deviations, we decided to calculate odds ratios and corresponding confidence intervals according to:
+
+* A 0.150g (or 150mg) increase in sugar per serving
+* A 0.030g (or 30mg) increase in fat per serving
+* A 2.5mg increase in sodium per serving
+
+This would provide a clearer interpretation with an increase that's close to an explanatory variable's standard deviation.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-sugar_1g_conv <- ((5 - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g)))
-fat_1g_conv <- ((1 - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g)))
-sodium_1mg_conv <- ((100 - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))
+sugar_1g_conv <- ((0.150 - min(cereal$sugar_g/cereal$size_g))/(max(cereal$sugar_g/cereal$size_g) - min(cereal$sugar_g/cereal$size_g)))
+fat_1g_conv <- ((0.030 - min(cereal$fat_g/cereal$size_g))/(max(cereal$fat_g/cereal$size_g) - min(cereal$fat_g/cereal$size_g)))
+sodium_1mg_conv <- ((2.5 - min(cereal$sodium_mg/cereal$size_g))/(max(cereal$sodium_mg/cereal$size_g) - min(cereal$sodium_mg/cereal$size_g)))
 c.value <- c(sugar_1g_conv, fat_1g_conv, sodium_1mg_conv)
 
 # Gather Odds Ratios
@@ -287,12 +305,12 @@ round(data.frame(low = ci[,2], up = ci[,1]), 2)
 
 Based on the above results, we interpret the following ratios:
 
-* The estimated odds of shelf location being below a particular level change by about 1.50 times for a 5g increase in sugar per serving size, holding the other variables constant.
-* The estimated odds of shelf location being below a particular level change by about 1.01 times for a 1g increase in fat per serving size, holding the other variables constant.
-* The estimated odds of shelf location being below a particular level change by about 4.36 times for a 100mg increase in sodium per serving size, holding the other variables constant.
-* With 95% confidence, the odds of shelf location being below a particular level change by 0.82 to 2.93 times when sugar is increased by 5g per serving size, holding the other variables constant.
-* With 95% confidence, the odds of shelf location being below a particular level change by 0.69 to 1.48 times when fat is increased by 1g per serving size, holding the other variables constant.
-* With 95% confidence, the odds of shelf location being below a particular level change by 1.80 to 12.88 times when sodium is increased by 100mg per serving size, holding the other variables constant.
+* The estimated odds of shelf location being below a particular level change by about 1.54 times for a 150mg increase in sugar per serving size, holding the other variables constant.
+* The estimated odds of shelf location being below a particular level change by about 1.02 times for a 30mg increase in fat per serving size, holding the other variables constant.
+* The estimated odds of shelf location being below a particular level change by about 3.11 times for a 2.5mg increase in sodium per serving size, holding the other variables constant.
+* With 95% confidence, the odds of shelf location being below a particular level change by 0.81 to 3.19 times when sugar is increased by 150mg per serving size, holding the other variables constant.
+* With 95% confidence, the odds of shelf location being below a particular level change by 0.54 to 1.89 times when fat is increased by 30mg per serving size, holding the other variables constant.
+* With 95% confidence, the odds of shelf location being below a particular level change by 1.57 to 7.15 times when sodium is increased by 2.5mg per serving size, holding the other variables constant.
 
 This relates to the plots constructed as we have been observing this natural clustering to the placement of cereals on store shelves. Shelves 1 and 2 appear to have more unheatlhy cereals with higher Sugar & Sodium contents, whereas Shelves 3 and 4 appear to have healthier cereals. We can see this in the odds ratios above because we decrease our odds for being on the higher shelf as we increase Sugar and Sodium, and vice versa.
 
