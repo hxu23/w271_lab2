@@ -123,7 +123,7 @@ The response has values of 1, 2, 3, and 4. Under what setting would it be desira
 
 #### Answer
 
-It would be desirable to take into account ordinality when the variable has a natural ordering to their levels. In other words, if response levels can be arranged so that category 1 < category 2 < ··· < category J in some conceptual scale of measurement (e.g., amount of agreement). Since the shelf has a natural ordering to their levels, bottom (1) to top (4), it would make sense to take into account ordinality.
+It would be desirable to take into account ordinality when the variable has a natural ordering to their levels. In other words, it would be desirable to take into account ordinality if response levels can be arranged so that category 1 < category 2 < ··· < category J in some conceptual scale of measurement (e.g., amount of agreement). Since the shelf has a natural ordering to their levels, bottom (1) to top (4), it would make sense to take into account ordinality.
 
 ## Part D
 
@@ -155,6 +155,8 @@ mod.fit.ord2 <- polr(formula = as.factor(Shelf) ~ sugar + fat + sodium
 Anova(mod.fit.ord2)
 ```
 
+Looking at the above Anova test after adding in all the different interactions between the explanatory variables, we can see that none of the interactions have a statistically significant result (in fact, all the interactions have a p-value of above 0.50). This shows that there are no significant interactions among the explanatory variables (including the interaction among all three variables).
+
 ## Part F
 
 #### Question
@@ -164,11 +166,12 @@ Kellogg’s Apple Jacks (http://www.applejacks.com) is a cereal marketed to- war
 #### Answer
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-summary(mod.fit.ord)
 predict(object = mod.fit.ord, newdata = data.frame(sugar = (((12/28) - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g))),
                                                    fat = (((0.5/28) - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g))),
                                                    sodium = (((130/28) - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))),  type = "probs")
 ```
+
+By predicting the shelf probabilities based on the serving size, sugar content, fat content, and sodium content of Apple Jacks cereal, we can see that there is about a 0.9% chance of it being on shelf 1, a 2.8% chance of it being on shelf 2, a 9.5% chance of it being on shelf 3, and a 86.8% chance of it being on shelf 4. We can conclude that Apple Jacks has a higher probability of appearing on the higher shelves, with the highest probability of it being on the top (4) shelf.
 
 ## Part G
 
@@ -235,39 +238,46 @@ Estimate odds ratios and calculate corresponding confidence intervals for each e
 
 #### Answer
 
-We convert c to be 1g or 1mg of the content in order to better explain the interpretation:
+First, we take a look at the stanard deviations of the explanatory variables in order to find an appropriate c-value for our odds ratios interpretation and calculation:
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+# Obtain standard deviation of the explanatory variables and normalize the values
+# to obtain c-values used for the odd ratios and confidence intervals
+(sd.cereal<-round(apply(X = cereal[,-c(1,2,3,4)], MARGIN = 2, FUN = sd)))
+```
 
-sd.cereal<-round(apply(X = cereal[,-c(1,2,3,4)], MARGIN = 2, FUN = sd))
+Looking at the above standard deviations, we decided to calculate odds ratios and corresponding confidence intervals according to a 5g increase in sugar per serving, a 1g increase in fat per serving, and 100mg increease in sodium per serving. This would provide a clearer interpretation with an increase that's close to an explanatory variable's standard deviation.
 
-sd.cereal
-
-sugar_1g_conv <- (((sd.cereal[1]/28) - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g)))
-
-fat_1g_conv <- (((sd.cereal[2]/28) - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g)))
-
-sodium_1mg_conv <- (((sd.cereal[3]/28) - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))
-
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+sugar_1g_conv <- ((5 - min(cereal$sugar_g))/(max(cereal$sugar_g) - min(cereal$sugar_g)))
+fat_1g_conv <- ((1 - min(cereal$fat_g))/(max(cereal$fat_g) - min(cereal$fat_g)))
+sodium_1mg_conv <- ((100 - min(cereal$sodium_mg))/(max(cereal$sodium_mg) - min(cereal$sodium_mg)))
 c.value <- c(sugar_1g_conv, fat_1g_conv, sodium_1mg_conv)
 
+# Gather Odds Ratios
 round(exp(c.value * (-mod.fit.ord$coefficients)),2)
 
+# Calculate Confidence Intervals for Odds Ratios
 conf.beta <- confint(object = mod.fit.ord, level = 0.95)
-
 ci <- exp(c.value*(-conf.beta))
-
 round(data.frame(low = ci[,2], up = ci[,1]), 2)
-
-summary(mod.fit.ord)
-
-Anova(mod.fit.ord)
-
 ```
+
+Based on the above results, we interpret the following ratios:
+
+* The estimated odds of shelf location being below a particular level change by about 1.50 times for a 5g increase in sugar per serving size, holding the other variables constant.
+* The estimated odds of shelf location being below a particular level change by about 1.01 times for a 1g increase in fat per serving size, holding the other variables constant.
+* The estimated odds of shelf location being below a particular level change by about 4.36 times for a 100mg increase in sodium per serving size, holding the other variables constant.
+* With 95% confidence, the odds of shelf location being below a particular level change by 0.82 to 2.93 times when sugar is increased by 5g per serving size, holding the other variables constant.
+* With 95% confidence, the odds of shelf location being below a particular level change by 0.69 to 1.48 times when fat is increased by 1g per serving size, holding the other variables constant.
+* With 95% confidence, the odds of shelf location being below a particular level change by 1.80 to 12.88 times when sodium is increased by 100mg per serving size, holding the other variables constant.
+
+This relates to the plots constructed because...
 
 # Conclusion
 
-In conclusion, we were able to predict...
+In conclusion, we estimated a ordinal response regression model in order to conduct strategic placement of cereal boxes in grocery stores. We chose an ordinal response regression model because our response variable, `Shelf`, is a categorical variable with 4 different categories, which also has a natural ordering to their levels. Using this model, we are able to recommend a shelf based on the characteristics of the cereal, such as the serving size, sugar content, fat content, and sodium content. This would allow us to better place a cereal box on a shelf where we can maximize revenue and increase profit.
+
 
 
 
