@@ -1,6 +1,7 @@
 ---
 title: "Statistical Methods for Discrete Response, Time Series, and Panel Data (W271): Lab 2"
 author: "Harry Xu and Rich Ung"
+date: "`r format(Sys.time(), '%B %d %Y')`"
 output: 
   pdf_document:
   toc: true
@@ -9,6 +10,10 @@ fontsize: 11pt
 geometry: margin=1in
 line_spacing: single
 ---
+
+\tableofcontents
+
+\newpage
 
 # Introduction
 
@@ -41,6 +46,17 @@ summary(cereal)
 ```
 
 We can see that our dataset has 40 observations of 7 variables, with no missing values for any of our variables. It looks like each row corresponds to a particular cereal, where "Cereal" contains the name of the cereal and "Shelf" contains the shelf that the cereal is located. We can also see that we have the serving size, sugar, fat, and sodium contents for each cereal.
+
+We next take a look at the distributions of the serviing size, sugar, fat, and sodium variables through multiple histogram plots:
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), fig.height = 4.5, fig.width = 5.5, fig.align = "center"}
+hist(cereal$size_g)
+hist(cereal$sugar_g)
+hist(cereal$fat_g)
+hist(cereal$sodium_mg)
+```
+
+From the above histogram plots, we can see that most of the cereal have serving sizes from 25-30g. We can also see a relatively uniform distribution of sugar content for the different cereals. We see a right-tailed distribution for fat content, meaning that there are a few cereals with extremely high fat content relative to the other cereals. Lastly, we see a relatively normal distribution of sodium content for our cereals. We continue this EDA through parts A and B within our *Modeling & Questions* section.
 
 # Modeling & Questions
 
@@ -282,7 +298,7 @@ This relates to the plots constructed as we have been observing this natural clu
 
 # Conclusion
 
-In conclusion, we estimated a ordinal response regression model in order to conduct strategic placement of cereal boxes in grocery stores. We chose an ordinal response regression model because our response variable, `Shelf`, is a categorical variable with 4 different categories, which also has a natural ordering to their levels. Using this model, we are able to recommend a shelf based on the characteristics of the cereal, such as the serving size, sugar content, fat content, and sodium content. This would allow us to better place a cereal box on a shelf where we can maximize revenue and increase profit.
+In conclusion, we estimated a ordinal response regression model in order to conduct strategic placement of cereal boxes in grocery stores. We chose an ordinal response regression model because our response variable, `Shelf`, is a categorical variable with 4 different categories, which also has a natural ordering to their levels. Using this model, we are able to recommend a shelf based on the characteristics of the cereal, such as the serving size, sugar content, fat content, and sodium content. This would allow us to better place a cereal box on a shelf where we can maximize revenue and increase profit. Through the constructed model, we see that the unhealthy cereals with high concentrations of sugar, fat, and sodium are more likely to be placed on the lower shelves, and healther cereals with low concentrations of sugar, fat, and sodium are more likely to be placed in the higher shelves.
 
 
 
