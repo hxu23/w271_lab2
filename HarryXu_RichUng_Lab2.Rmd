@@ -24,10 +24,11 @@ By using multicategory response models, we can maximize sales by placing the cer
 
 In order to perform our analyses, we first load the required R libraries:
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, warning=FALSE, results='hide'}
 knitr::opts_chunk$set(echo = TRUE, tidy.opts=list(width.cutoff=60), tidy=TRUE)
 library(package = MASS)
 library(package = car)
+library(package = nnet)
 ```
 
 Next, we load the data and perform a quick EDA:
@@ -69,7 +70,7 @@ By executing the code chunk above, we have already re-formatted the dataset by d
 
 Construct side-by-side box plots with dot plots overlaid for each of the explanatory variables. Below is code that can be used for plots involving sugar:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 boxplot(formula = sugar ~ Shelf, data = cereal2, ylab = "Sugar", xlab = "Shelf", pars = list(outpch=NA))
 stripchart(x = cereal2$sugar ~ cereal2$Shelf, lwd = 2, col = "red", method = "jitter", vertical = TRUE, pch = 1, add = TRUE)
 ```
@@ -109,10 +110,11 @@ legend(x = 3.5, y = 1, legend = c("1", "2", "3", "4"), lty = c("solid", "longdas
 
 ```
 
-There appears to be some content difference clustered by shelves. As the above parallel coordinates plot shows, Shelf 4 Cereals appear to have the lowest Sugar, Fat and Sodium content -- which suggest this shelf contains "healthier" types of cereals. Shelf 3 appears to have the highest Sugar content and perhaps the least "healthiest" cereals. This appears to be the case by examining the brands of the Cereals placed on Shelf 4.
+There appears to be some content difference clustered by shelves. As the above parallel coordinates plot shows, Shelf 4 Cereals appear to have the lowest Sugar, Fat and Sodium content -- which suggest this shelf contains "healthier" types of cereals. Shelf 1 appears to have the highest Sugar content and perhaps the most "unhealthiest" cereals. This appears to be the case by examining the brands of the Cereals placed on Shelf 4 vs. brands of Cereals placed on Shelf 1
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 cereal[cereal$Shelf==4,]
+cereal[cereal$Shelf==1,]
 ```
 
 ## Part C
@@ -138,6 +140,8 @@ mod.fit.ord <- polr(formula = as.factor(Shelf) ~ sugar + fat + sodium, data = ce
 summary(mod.fit.ord)
 Anova(mod.fit.ord)
 ```
+
+The results of the LRT for the multionmial regression model show that the only significant variable appears to be Sodium in predicting which shelf the Cereal will be placed on. 
 
 ## Part E
 
@@ -179,8 +183,6 @@ Construct a plot similar to Figure 3.3 where the estimated probability for a she
 #### Answer
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60), fig.height = 4.5, fig.width = 5.5, fig.align = "center"}
-library(package = MASS)
-library(package = nnet)
 mod.fit.sugar<-polr(formula = as.factor(Shelf) ~ sugar + sodium + fat, data = cereal2, method = "logistic")
 summary(mod.fit.sugar)
 beta.hat<-c(-mod.fit.ord$coefficients, mod.fit.ord$zeta)
@@ -192,31 +194,31 @@ curve( 1/(1 + exp(beta.hat[3] + beta.hat[1]*x) + exp(beta.hat[4] + beta.hat[1]*x
       col = "black", lty = "solid", lwd = 2, n = 1000, type = "n",
       panel.first = grid(col = "gray", lty = "dotted"))
 
+# Shelf 1
 curve(expr = plogis(q = mod.fit.sugar$zeta[1] - mod.fit.sugar$coefficients[1]*x 
                     - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
-                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), col = "green",
-      type = "l",
-      add = TRUE, lty = "dotdash", n = 1000)  # Shelf 1
+                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), 
+      col = "green", type = "l", add = TRUE, lty = "dotdash", n = 1000)  
 
-
+# Shelf 2
 curve(expr = plogis(q = mod.fit.sugar$zeta[2] - mod.fit.sugar$coefficients[1]*x
                         - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
                         - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)) 
           - plogis(q = mod.fit.sugar$zeta[1] - mod.fit.sugar$coefficients[1]*x 
                     - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
-                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), col = "red",
-     type = "l",
-     add = TRUE, lty = "longdash", n = 1000)  # Shelf 2
+                    - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), 
+      col = "red", type = "l", add = TRUE, lty = "longdash", n = 1000)  
 
+# Shelf 3
 curve(expr = plogis(q = mod.fit.sugar$zeta[3] - mod.fit.sugar$coefficients[1]*x
                         - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
                         - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)) 
           - plogis(q = mod.fit.sugar$zeta[2] - mod.fit.sugar$coefficients[1]*x 
                     - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
                     - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)), 
-      col = "blue", type = "l", add = TRUE, lty = "solid", n = 1000)  # Shelf 3
+      col = "blue", type = "l", add = TRUE, lty = "solid", n = 1000)  
 
-
+# Shelf 4
 curve(expr = 1 - plogis(q=mod.fit.sugar$zeta[3]- mod.fit.sugar$coefficients[1]*x
                         - mod.fit.sugar$coefficients[2]*mean(cereal2$sodium)
                         - mod.fit.sugar$coefficients[3]*mean(cereal2$fat)),
@@ -226,6 +228,8 @@ legend(x = 'bottomleft', legend=c("Shelf 1", "Shelf 2", "Shelf 3", "Shelf 4"),
        lty=c("dotdash","longdash","solid", "twodash"),
        col=c("green","red","blue", "black"), bty="n", lwd = c(2,2,2,2), seg.len = 4)
 ```
+
+By holding the Sodium and Fat variables constant at their mean values, we can plot the probability of being on each Shelf (1-4) relative to the explanatory variable Sugar. As we noted before, it appears that Shelf 4 contains the "healthy" cereals whereas Self 1 contains the "unhealthy" cereals. We can see that in the above probability curves since as the Sugar variable increases, the probability of being on Shelf 4 decreases while the probability of being on Shelf 1 increases.
 
 ## Part H
 
