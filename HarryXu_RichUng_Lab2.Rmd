@@ -98,7 +98,7 @@ Below is a parallel coordinates plot for the explanatory variables and the shelf
 
 cereal2.colors<-ifelse(test = cereal2$Shelf==1, yes = "black", 
                     no = ifelse(test = cereal2$Shelf==2, yes = "red",
-                                ifelse(test = cereal2$Shelf==3, yes = "red", no = "blue")))
+                                ifelse(test = cereal2$Shelf==3, yes = "green", no = "blue")))
 
 cereal2.lty<-ifelse(test = cereal2$Shelf==1, yes = "solid", 
                     no = ifelse(test = cereal2$Shelf==2, yes = "longdash",
@@ -141,7 +141,7 @@ summary(mod.fit.ord)
 Anova(mod.fit.ord)
 ```
 
-The results of the LRT for the multionmial regression model show that the only significant variable appears to be Sodium in predicting which shelf the Cereal will be placed on. 
+The results of the LRT for the multionmial regression model show that the only significant variable appears to be Sodium in predicting which shelf the Cereal will be placed on. Because of the large test statistic value for sodium, there is sufficient evidence that sodium is an important explanatory variable. Even though the other variables are statistically insignificant, the test for sodium is conditional on the other variables being in the model.
 
 ## Part E
 
