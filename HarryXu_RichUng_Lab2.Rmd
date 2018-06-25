@@ -110,7 +110,7 @@ legend(x = 3.5, y = 1, legend = c("1", "2", "3", "4"), lty = c("solid", "longdas
 
 ```
 
-There appears to be some content difference clustered by shelves. As the above parallel coordinates plot shows, Shelf 4 Cereals appear to have the lowest Sugar, Fat and Sodium content -- which suggest this shelf contains "healthier" types of cereals. Shelf 1 appears to have the highest Sugar content and perhaps the most "unhealthiest" cereals. This appears to be the case by examining the brands of the Cereals placed on Shelf 4 vs. brands of Cereals placed on Shelf 1
+There appears to be some content difference clustered by shelves. As the above parallel coordinates plot shows, Shelf 4 Cereals appear to have the lowest Sugar, Fat and Sodium content -- which suggest this shelf contains "healthier" types of cereals. Shelf 1 appears to have the highest Sodium content with second highest Sugar which leads us to believe it contains the most "unhealthiest" cereals. This appears to be the case by examining the brands of the Cereals placed on Shelf 4 vs. brands of Cereals placed on Shelf 1. Likewise, Shelf 2 also appears to have more unhealthy cereals and Shelf 3 appears to be closer to Shelf 4 with healthier cereals.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 cereal[cereal$Shelf==4,]
@@ -125,7 +125,9 @@ The response has values of 1, 2, 3, and 4. Under what setting would it be desira
 
 #### Answer
 
-It would be desirable to take into account ordinality when the variable has a natural ordering to their levels. In other words, it would be desirable to take into account ordinality if response levels can be arranged so that category 1 < category 2 < ··· < category J in some conceptual scale of measurement (e.g., amount of agreement). Since the shelf has a natural ordering to their levels, bottom (1) to top (4), it would make sense to take into account ordinality.
+It would be desirable to take into account ordinality when the variable has a natural ordering to their levels. In other words, it would be desirable to take into account ordinality if response levels can be arranged so that category 1 < category 2 < ··· < category J in some conceptual scale of measurement (e.g., amount of agreement). 
+
+Since the shelf has a natural ordering to their levels, bottom (1) to top (4), it would make sense to take into account ordinality. One reason for this natural ordering could result from visibility to customers in the store (top shelf is more desirable vs. bottom).
 
 ## Part D
 
@@ -165,7 +167,7 @@ Looking at the above Anova test after adding in all the different interactions b
 
 #### Question
 
-Kellogg’s Apple Jacks (http://www.applejacks.com) is a cereal marketed to- ward children. For a serving size of 28 grams, its sugar content is 12 grams, fat content is 0.5 grams, and sodium content is 130 milligrams. Estimate the shelf probabilities for Apple Jacks.
+Kellogg’s Apple Jacks (http://www.applejacks.com) is a cereal marketed toward children. For a serving size of 28 grams, its sugar content is 12 grams, fat content is 0.5 grams, and sodium content is 130 milligrams. Estimate the shelf probabilities for Apple Jacks.
 
 #### Answer
 
@@ -242,7 +244,7 @@ Estimate odds ratios and calculate corresponding confidence intervals for each e
 
 #### Answer
 
-First, we take a look at the stanard deviations of the explanatory variables in order to find an appropriate c-value for our odds ratios interpretation and calculation:
+First, we take a look at the standard deviations of the explanatory variables in order to find an appropriate c-value for our odds ratios interpretation and calculation:
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # Obtain standard deviation of the explanatory variables and normalize the values
@@ -276,7 +278,7 @@ Based on the above results, we interpret the following ratios:
 * With 95% confidence, the odds of shelf location being below a particular level change by 0.69 to 1.48 times when fat is increased by 1g per serving size, holding the other variables constant.
 * With 95% confidence, the odds of shelf location being below a particular level change by 1.80 to 12.88 times when sodium is increased by 100mg per serving size, holding the other variables constant.
 
-This relates to the plots constructed because...
+This relates to the plots constructed as we have been observing this natural clustering to the placement of cereals on store shelves. Shelves 1 and 2 appear to have more unheatlhy cereals with higher Sugar & Sodium contents, whereas Shelves 3 and 4 appear to have healthier cereals. We can see this in the odds ratios above because we decrease our odds for being on the higher shelf as we increase Sugar and Sodium, and vice versa.
 
 # Conclusion
 
