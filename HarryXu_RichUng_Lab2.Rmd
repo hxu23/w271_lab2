@@ -23,7 +23,7 @@ We receive the following prompt from **Question 12 of chapter 3 (on page 189 and
 
 ```In order to maximize sales, items within grocery stores are strategically placed to draw customer attention. This exercise examines one type of item—breakfast cereal. Typically, in large grocery stores, boxes of cereal are placed on sets of shelves located on one side of the aisle. By placing particular boxes of cereals on specific shelves, grocery stores may better attract customers to them. To investigate this further, a random sample of size 10 was taken from each of four shelves at a Dillons grocery store in Manhattan, KS. These data are given in the cereal_dillons.csv file. The response variable is the shelf number, which is numbered from bottom (1) to top (4), and the explanatory variables are the sugar, fat, and sodium content of the cereals.```
 
-By using multicategory response models, we can maximize sales by placing the cereal in the shelf that best fits its attributes (such as sugar, fat, and sodium content).
+By using multicategory response models, we can maximize sales by placing the cereal in the shelf that best fits its attributes (such as sugar, fat, and sodium content). We first perform an exploratory data analysis to better understand our dataset. Based on our analysis, we chose a multinomial regression model that took into account ordinality of the shelves, and looked into how sugar, fat, and sodium content affected the probability of which shelf a particular cereal should be placed.
 
 # Exploratory Data Analysis
 
